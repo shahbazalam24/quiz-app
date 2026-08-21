@@ -1,0 +1,405 @@
+HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Development Quiz Application</title>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 550px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .switch-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .switch-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+
+        .timer {
+            background: #feb2b2;
+            color: #9b2c2c;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .options-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .options-list li {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .options-list li:hover {
+            background: #edf2f7;
+        }
+
+        .options-list li.selected {
+            background: #c3dafe;
+            border-color: #7f9cf5;
+            color: #2b6cb0;
+            font-weight: bold;
+        }
+
+        .result-box {
+            text-align: center;
+        }
+
+        .result-box h3 {
+            font-size: 24px;
+            color: #2f855a;
+            margin-bottom: 15px;
+        }
+
+        .result-box p {
+            font-size: 16px;
+            margin: 10px 0;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. SIGNUP PAGE -->
+    <div id="signup-page" class="container active">
+        <h2>Create Account</h2>
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="signup-name" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="signup-email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signup-password" placeholder="Enter your password">
+        </div>
+        <button onclick="handleSignup()">Sign Up</button>
+        <div class="switch-text">
+            Already have an account? <a href="#" onclick="showPage('login-page')">Login</a>
+        </div>
+    </div>
+
+    <!-- 2. LOGIN PAGE -->
+    <div id="login-page" class="container">
+        <h2>Welcome Back</h2>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter your password">
+        </div>
+        <button onclick="handleLogin()">Login</button>
+        <div class="switch-text">
+            Don't have an account? <a href="#" onclick="showPage('signup-page')">Sign Up</a>
+        </div>
+    </div>
+
+    <!-- 3. QUIZ HOME PAGE -->
+    <div id="home-page" class="container">
+        <h2>Web Development Quiz</h2>
+        <p style="margin-bottom: 15px; color: #4a5568;">Test your knowledge of HTML, CSS & JavaScript.</p>
+        <p style="margin-bottom: 8px;"><strong>Total Questions:</strong> 25</p>
+        <p style="margin-bottom: 20px;"><strong>Time per Question:</strong> 30 Seconds</p>
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <!-- 4. QUIZ QUESTION PAGE -->
+    <div id="quiz-page" class="container">
+        <div class="quiz-header">
+            <span id="question-count" style="font-weight: bold; color: #4a5568;"></span>
+            <div class="timer">Time: <span id="time-left">30</span>s</div>
+        </div>
+        <div class="question-text" id="question-title"></div>
+        <ul class="options-list" id="options-container"></ul>
+        <button id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+    </div>
+
+    <!-- 5. RESULT PAGE -->
+    <div id="result-page" class="container">
+        <div class="result-box">
+            <h3>🎉 Congratulations!</h3>
+            <p>You have completed the Web Development Quiz.</p>
+            <p style="font-size: 18px; font-weight: bold;">Your Score: <span id="final-score"></span> / 25</p>
+            <p style="font-size: 18px; font-weight: bold;">Percentage: <span id="final-percentage"></span>%</p>
+            <p id="result-message" style="margin-top: 15px; font-weight: bold; color: #2b6cb0;"></p>
+            <button onclick="restartQuiz()" style="margin-top: 20px;">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Text Machine Language", "Hyper Tool Multi Language", "Home Text Markup Language"], answer: 0 },
+            { q: "Which HTML tag is used to create a hyperlink?", options: ["<link>", "<a>", "<href>", "<url>"], answer: 1 },
+            { q: "Which HTML input type is used for secure password input?", options: ["text", "secure", "password", "input"], answer: 2 },
+            { q: "Which semantic tag represents header content in HTML5?", options: ["<section>", "<top>", "<header>", "<head>"], answer: 2 },
+            { q: "How do you create a checkbox in HTML?", options: ["<input type='checkbox'>", "<checkbox>", "<input type='check'>", "<box>"], answer: 0 },
+            { q: "What does CSS stand for?", options: ["Creative Style Sheets", "Cascading Style Sheets", "Computer Style Sheets", "Colorful Style Sheets"], answer: 1 },
+            { q: "Which CSS property is used to change text color?", options: ["text-color", "font-color", "color", "background-color"], answer: 2 },
+            { q: "How do you make each word in a text start with a capital letter using CSS?", options: ["text-transform: capitalize;", "text-style: capital;", "transform: capitalize;", "text-transform: uppercase;"], answer: 0 },
+            { q: "Which CSS property controls the layout using flex items?", options: ["display: block;", "display: flex;", "display: grid-box;", "display: box;"], answer: 1 },
+            { q: "What is the default value of the position property in CSS?", options: ["relative", "absolute", "fixed", "static"], answer: 3 },
+            { q: "Which CSS property is used to create space inside elements, relative to the border?", options: ["margin", "spacing", "padding", "border-spacing"], answer: 2 },
+            { q: "Which media query is used to target screens at least 600px wide?", options: ["@media (max-width: 600px)", "@media (min-width: 600px)", "@media (width > 600px)", "@media screen 600"], answer: 1 },
+            { q: "Inside which HTML element do we put the JavaScript?", options: ["<js>", "<script>", "<javascript>", "<code>"], answer: 1 },
+            { q: "How do you write 'Hello World' in an alert box?", options: ["msg('Hello World');", "alertBox('Hello World');", "alert('Hello World');", "msgBox('Hello World');"], answer: 2 },
+            { q: "How do you create a function in JavaScript?", options: ["function myFunction()", "function:myFunction()", "def myFunction()", "create myFunction()"], answer: 0 },
+            { q: "How do you call a function named 'myFunction'?", options: ["call myFunction()", "myFunction()", "run myFunction()", "exec myFunction()"], answer: 1 },
+            { q: "Which array method adds an element to the end of an array?", options: ["shift()", "unshift()", "push()", "pop()"], answer: 2 },
+            { q: "How do you write a conditional statement for executing code if 'i' is equal to 5?", options: ["if i = 5", "if (i == 5)", "if i == 5 then", "if (i === 5)"], answer: 3 },
+            { q: "Which keyword is used to declare a variable in modern JavaScript?", options: ["var", "let", "variable", "int"], answer: 1 },
+            { q: "What is the output of typeof [] in JavaScript?", options: ["array", "object", "list", "undefined"], answer: 1 },
+            { q: "Which event occurs when the user clicks on an HTML element?", options: ["onmouseover", "onchange", "onclick", "onpress"], answer: 2 },
+            { q: "How do you save data permanently in the browser using JavaScript?", options: ["Cookies", "Local Storage", "Session Storage", "Database"], answer: 1 },
+            { q: "Which ES6 feature allows passing an indefinite number of arguments as an array?", options: ["Arrow functions", "Rest operator (...)", "Spread syntax", "Template literals"], answer: 1 },
+            { q: "What does DOM stand for?", options: ["Document Object Model", "Data Object Management", "Document Oriented Model", "Digital Ordinance Module"], answer: 0 },
+            { q: "Which method is used to select an element by its ID in JavaScript?", options: ["getElementByClass()", "querySelector()", "getElementById()", "select()"], answer: 2 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let timer;
+        let timeLeft = 30;
+
+        function showPage(pageId) {
+            document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function handleSignup() {
+            let name = document.getElementById('signup-name').value.trim();
+            let email = document.getElementById('signup-email').value.trim();
+            let password = document.getElementById('signup-password').value.trim();
+
+            if (!name || !email || !password) {
+                Swal.fire("Error", "Please fill in all fields!", "error");
+                return;
+            }
+
+            let userData = { name, email, password };
+            localStorage.setItem('quizUser', JSON.stringify(userData));
+
+            Swal.fire({
+                title: "Signup Successful!",
+                text: "Your account has been created successfully.",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                showPage('login-page');
+            });
+        }
+
+        function handleLogin() {
+            let email = document.getElementById('login-email').value.trim();
+            let password = document.getElementById('login-password').value.trim();
+            let storedUser = JSON.parse(localStorage.getItem('quizUser'));
+
+            if (!storedUser || storedUser.email !== email || storedUser.password !== password) {
+                Swal.fire("Error", "Invalid email or password!", "error");
+                return;
+            }
+
+            Swal.fire({
+                title: "Login Successful!",
+                text: "Welcome back!",
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                showPage('home-page');
+            });
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            showPage('quiz-page');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timer);
+            timeLeft = 30;
+            document.getElementById('time-left').innerText = timeLeft;
+            selectedOption = null;
+            document.getElementById('next-btn').disabled = true;
+
+            let qObj = questions[currentQuestionIndex];
+            document.getElementById('question-count').innerText = `Question ${currentQuestionIndex + 1} / 25`;
+            document.getElementById('question-title').innerText = qObj.q;
+
+            let optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            qObj.options.forEach((opt, index) => {
+                let li = document.createElement('li');
+                li.innerText = opt;
+                li.onclick = () => selectOption(index, li);
+                optionsContainer.appendChild(li);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time-left').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function selectOption(index, element) {
+            document.querySelectorAll('.options-list li').forEach(li => li.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedOption = index;
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            clearInterval(timer);
+            if (selectedOption !== null && selectedOption === questions[currentQuestionIndex].answer) {
+                score++;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            showPage('result-page');
+            let percentage = (score / questions.length) * 100;
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-percentage').innerText = percentage.toFixed(0);
+
+            let msg = percentage >= 50 ? "Keep Learning & Keep Coding!" : "Better luck next time!";
+            document.getElementById('result-message').innerText = msg;
+        }
+
+        function restartQuiz() {
+            showPage('home-page');
+        }
+    </script>
+</body>
+</html>
